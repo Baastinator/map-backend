@@ -1,15 +1,16 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { Connection, createConnection, MysqlError } from 'mysql';
 import { password } from '../password.txt';
+import { ConfigService } from '@nestjs/config';
 
 @Injectable()
 export class MysqlService {
   private logger = new Logger();
   private dbCon: Connection;
 
-  constructor() {
+  constructor(private configService: ConfigService) {
     this.dbCon = createConnection({
-      host: 'ssh.seb-kring.com',
+      host: this.configService.get('databaseURI'),
       password,
       user: 'root',
       port: 3306,
