@@ -52,11 +52,7 @@ export class MapController {
       (): void => void 0,
     );
 
-    const imageUrl =
-      this.configService.get('backendURL') +
-      '/api/images/' +
-      image.filename +
-      type;
+    const imageUrl = image.filename + type;
 
     await this.mapService.setImageUrl(id, imageUrl);
 

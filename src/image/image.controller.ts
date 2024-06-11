@@ -41,11 +41,7 @@ export class ImageController {
       (): void => void 0,
     );
 
-    const imageUrl =
-      this.configService.get('backendURL') +
-      '/api/images/' +
-      image.filename +
-      type;
+    const imageUrl = image.filename + type;
 
     return { url: imageUrl };
   }
