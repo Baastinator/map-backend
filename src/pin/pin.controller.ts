@@ -15,12 +15,12 @@ export class PinController {
 
   @Get(':id')
   public async getById(@Param() { id }: Identifiable): Promise<PinDto> {
-    return await this.pinService.getById(Number(id));
+    return await this.pinService.getById(id);
   }
 
   @Get('map/:id')
   public async getByMapId(@Param() { id }: Identifiable): Promise<PinDto[]> {
-    return await this.pinService.getByMapId(Number(id));
+    return await this.pinService.getByMapId(id);
   }
 
   @Post('')

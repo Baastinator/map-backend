@@ -39,8 +39,14 @@ export class PinService {
 
   public async createNew(body: PinCreateDto): Promise<void> {
     await this.mysqlService.query<void>(
-      'INSERT INTO Pins (X, Y, Content, MapID) VALUES (?, ?, ?, ?)',
-      [String(body.x), String(body.y), body.content, String(body.mapId)],
+      'INSERT INTO Pins (Name, X, Y, Content, MapID) VALUES (?, ?, ?, ?, ?)',
+      [
+        body.name,
+        String(body.x),
+        String(body.y),
+        body.content,
+        String(body.mapId),
+      ],
     );
 
     this.signalService.sendSignal(Signals.Pins);
