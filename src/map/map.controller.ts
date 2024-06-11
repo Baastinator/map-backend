@@ -14,14 +14,10 @@ import { FileInterceptor } from '@nestjs/platform-express';
 import { Identifiable } from '../models/id.interface';
 import { join } from 'path';
 import * as fs from 'fs';
-import { ConfigService } from '@nestjs/config';
 
 @Controller('api/maps')
 export class MapController {
-  constructor(
-    private mapService: MapService,
-    private configService: ConfigService,
-  ) {}
+  constructor(private mapService: MapService) {}
 
   @Get(['', '/'])
   public async getAll(): Promise<MapModel[]> {

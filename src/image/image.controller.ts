@@ -11,12 +11,9 @@ import {
 import { join } from 'path';
 import * as fs from 'fs';
 import { FileInterceptor } from '@nestjs/platform-express';
-import { ConfigService } from '@nestjs/config';
 
 @Controller('api/images')
 export class ImageController {
-  constructor(private configService: ConfigService) {}
-
   @Get(':url')
   public async getImage(
     @Param() { url }: { url: string },
