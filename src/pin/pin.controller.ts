@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Param, Post } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Post } from '@nestjs/common';
 import { PinDto } from './models/pin.dto';
 import { PinService } from './pin.service';
 import { Identifiable } from '../models/id.interface';
@@ -26,5 +26,26 @@ export class PinController {
   @Post('')
   public async createNewPin(@Body() body: PinCreateDto): Promise<void> {
     return await this.pinService.createNew(body);
+  }
+
+  @Post('rename/:id')
+  public async renamePin(
+    @Body() { name }: { name: string },
+    @Param() { id }: Identifiable,
+  ): Promise<void> {
+    return await this.pinService.rename(name, id);
+  }
+
+  @Post('content/:id')
+  public async reContentPin(
+    @Body() { content }: { content: string },
+    @Param() { id }: Identifiable,
+  ): Promise<void> {
+    return await this.pinService.reContent(content, id);
+  }
+
+  @Delete(':id')
+  public async deletePinById(@Param() { id }: Identifiable): Promise<void> {
+    return await this.pinService.deleteById(id);
   }
 }

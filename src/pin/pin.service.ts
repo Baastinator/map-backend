@@ -51,4 +51,30 @@ export class PinService {
 
     this.signalService.sendSignal(Signals.Pins);
   }
+
+  public async deleteById(id: number): Promise<void> {
+    await this.mysqlService.query<void>('DELETE FROM Pins WHERE ID = ?', [
+      String(id),
+    ]);
+
+    this.signalService.sendSignal(Signals.Pins);
+  }
+
+  public async rename(name: string, id: number): Promise<void> {
+    await this.mysqlService.query<void>(
+      'UPDATE Pins SET Name = ? WHERE ID = ?',
+      [name, String(id)],
+    );
+
+    this.signalService.sendSignal(Signals.Pins);
+  }
+
+  public async reContent(content: string, id: number): Promise<void> {
+    await this.mysqlService.query<void>(
+      'UPDATE Pins SET Content = ? WHERE ID = ?',
+      [content, String(id)],
+    );
+
+    this.signalService.sendSignal(Signals.Pins);
+  }
 }
