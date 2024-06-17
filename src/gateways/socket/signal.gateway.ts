@@ -9,7 +9,7 @@ import { SignalService } from './signal.service';
 import { Signals } from './signals.enum';
 import { filter } from 'rxjs';
 
-@WebSocketGateway(3333, {
+@WebSocketGateway(3334, {
   cors: true,
 })
 export class SignalGateway
