@@ -1,12 +1,25 @@
-import { Body, Controller, Delete, Get, Param, Post } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  HttpException,
+  HttpStatus,
+  Param,
+  Post,
+} from '@nestjs/common';
 import { PinDto } from './models/pin.dto';
 import { PinService } from './pin.service';
 import { Identifiable } from '../models/id.interface';
 import { PinCreateDto } from './models/pin-create.dto';
+import { MysqlService } from '../mysql/mysql.service';
 
 @Controller('api/pins')
 export class PinController {
-  constructor(private pinService: PinService) {}
+  constructor(
+    private pinService: PinService,
+    private mysqlService: MysqlService,
+  ) {}
 
   @Get('')
   public async getAll(): Promise<PinDto[]> {
@@ -15,6 +28,11 @@ export class PinController {
 
   @Get(':id')
   public async getById(@Param() { id }: Identifiable): Promise<PinDto> {
+    if (!(+id > 0))
+      throw new HttpException(
+        'ID needs to be a number',
+        HttpStatus.BAD_REQUEST,
+      );
     return await this.pinService.getById(id);
   }
 
