@@ -1,4 +1,4 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { TokenPayload } from './models/token-payload.interface';
 import * as jwt from 'jsonwebtoken';
 import { UserModel } from './models/user.model';
@@ -7,8 +7,6 @@ import { Request } from 'express';
 
 @Injectable()
 export class TokenService {
-  private logger = new Logger();
-
   constructor(private configService: ConfigService) {}
 
   public generateToken(user: UserModel): string {
