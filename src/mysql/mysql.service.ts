@@ -25,7 +25,7 @@ export class MysqlService {
     this.logger.log('Connected to Database');
   }
 
-  public async query<T>(query: string, params?: string[]): Promise<T> {
+  public async query<T>(query: string, params?: any[]): Promise<T> {
     return new Promise((resolve, reject) => {
       this.dbCon.query(query, params ?? [], (err, results) => {
         if (err) {

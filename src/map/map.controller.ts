@@ -4,6 +4,7 @@ import {
   Get,
   Param,
   Post,
+  Req,
   UploadedFile,
   UseInterceptors,
 } from '@nestjs/common';
@@ -14,10 +15,15 @@ import { FileInterceptor } from '@nestjs/platform-express';
 import { Identifiable } from '../models/id.interface';
 import { join } from 'path';
 import * as fs from 'fs';
+import { Request } from 'express';
+import { TokenService } from '../auth/token.service';
 
 @Controller('api/maps')
 export class MapController {
-  constructor(private mapService: MapService) {}
+  constructor(
+    private mapService: MapService,
+    private tokenService: TokenService,
+  ) {}
 
   @Get(['', '/'])
   public async getAll(): Promise<MapModel[]> {
@@ -30,8 +36,13 @@ export class MapController {
   }
 
   @Post('')
-  public async create(@Body() body: MapCreateDto): Promise<void> {
-    return await this.mapService.create(body);
+  public async create(
+    @Body() body: MapCreateDto,
+    @Req() req: Request,
+  ): Promise<void> {
+    const { ID } = this.tokenService.extractUserFromRequest(req);
+
+    return await this.mapService.create(body, ID);
   }
 
   @Post(':id/mapFile')

@@ -23,7 +23,7 @@ export class PinService {
     return (
       await this.mysqlService.query<PinModel[]>(
         'SELECT * FROM Pins WHERE ID = ?',
-        [String(id)],
+        [id],
       )
     ).map(toPinDto)[0];
   }
@@ -32,7 +32,7 @@ export class PinService {
     return (
       await this.mysqlService.query<PinModel[]>(
         'SELECT * FROM Pins WHERE MapID = ?',
-        [String(mapId)],
+        [mapId],
       )
     ).map(toPinDto);
   }
@@ -40,22 +40,14 @@ export class PinService {
   public async createNew(body: PinCreateDto): Promise<void> {
     await this.mysqlService.query<void>(
       'INSERT INTO Pins (Name, X, Y, Content, MapID) VALUES (?, ?, ?, ?, ?)',
-      [
-        body.name,
-        String(body.x),
-        String(body.y),
-        body.content,
-        String(body.mapId),
-      ],
+      [body.name, String(body.x), String(body.y), body.content, body.mapId],
     );
 
     this.signalService.sendSignal(Signals.Pins);
   }
 
   public async deleteById(id: number): Promise<void> {
-    await this.mysqlService.query<void>('DELETE FROM Pins WHERE ID = ?', [
-      String(id),
-    ]);
+    await this.mysqlService.query<void>('DELETE FROM Pins WHERE ID = ?', [id]);
 
     this.signalService.sendSignal(Signals.Pins);
   }
@@ -63,7 +55,7 @@ export class PinService {
   public async rename(name: string, id: number): Promise<void> {
     await this.mysqlService.query<void>(
       'UPDATE Pins SET Name = ? WHERE ID = ?',
-      [name, String(id)],
+      [name, id],
     );
 
     this.signalService.sendSignal(Signals.Pins);
@@ -72,7 +64,7 @@ export class PinService {
   public async reContent(content: string, id: number): Promise<void> {
     await this.mysqlService.query<void>(
       'UPDATE Pins SET Content = ? WHERE ID = ?',
-      [content, String(id)],
+      [content, id],
     );
 
     this.signalService.sendSignal(Signals.Pins);

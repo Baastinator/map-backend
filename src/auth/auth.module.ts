@@ -2,10 +2,13 @@ import { Module } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { AuthController } from './auth.controller';
 import { MysqlModule } from '../mysql/mysql.module';
+import { ConfigModule, ConfigService } from '@nestjs/config';
+import { TokenService } from './token.service';
 
 @Module({
-  providers: [AuthService],
-  imports: [MysqlModule],
+  providers: [AuthService, ConfigService, TokenService],
+  imports: [MysqlModule, ConfigModule.forRoot()],
   controllers: [AuthController],
+  exports: [TokenService],
 })
 export class AuthModule {}
