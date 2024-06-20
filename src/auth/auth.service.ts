@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { MysqlService } from '../mysql/mysql.service';
 import { LoginDTO } from './models/login.dto';
-import { UserModel } from './models/user.model';
+import { UserModel } from '../user/models/user.model';
 import * as bcrypt from 'bcrypt';
 import { hashSync } from 'bcrypt';
 import { TokenService } from './token.service';
@@ -51,16 +51,6 @@ export class AuthService {
 
   public async exists(username: string): Promise<boolean> {
     return !!(await this.getUserByUsername(username));
-  }
-
-  public async changePassword(body: LoginDTO): Promise<void> {
-    const saltRounds = 10;
-    const hash = hashSync(body.password, saltRounds);
-
-    await this.mysqlService.query(
-      'UPDATE Users SET Passhash = ? WHERE Username = ?',
-      [hash, body.username],
-    );
   }
 
   private async getUserByUsername(username: string): Promise<UserModel> {

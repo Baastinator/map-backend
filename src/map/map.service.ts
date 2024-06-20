@@ -23,16 +23,18 @@ export class MapService {
   }
 
   public async getMapOwnersById(id: number): Promise<number[]> {
-    return await this.mysqlService.query(
-      `SELECT U.ID
-       FROM Users U
-                JOIN Map.UserMapLink UML on U.ID = UML.UserID
-                JOIN Map.Maps M on M.ID = UML.MapID
-       WHERE MapID = ?
-         AND UML.Admin = 1
-      `,
-      [id],
-    );
+    return (
+      await this.mysqlService.query<{ ID: number }[]>(
+        `SELECT U.ID
+         FROM Users U
+                  JOIN Map.UserMapLink UML on U.ID = UML.UserID
+                  JOIN Map.Maps M on M.ID = UML.MapID
+         WHERE MapID = ?
+           AND UML.Admin = 1
+        `,
+        [id],
+      )
+    ).map(({ ID }: { ID: number }) => ID);
   }
 
   public async create(body: MapCreateDto, userID: number): Promise<void> {

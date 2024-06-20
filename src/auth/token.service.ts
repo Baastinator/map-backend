@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { TokenPayload } from './models/token-payload.interface';
 import * as jwt from 'jsonwebtoken';
-import { UserModel } from './models/user.model';
+import { UserModel } from '../user/models/user.model';
 import { ConfigService } from '@nestjs/config';
 import { Request } from 'express';
 

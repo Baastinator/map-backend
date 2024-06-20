@@ -32,7 +32,16 @@ export class AuthController {
   }
 
   @Post('register')
-  public async register(@Body() body: LoginDTO): Promise<void> {
+  public async register(
+    @Body() body: LoginDTO,
+    @Req() req: Request,
+  ): Promise<void> {
+    const user = this.tokenService.extractUserFromRequest(req);
+
+    if (!user) throw new HttpException('login first', HttpStatus.UNAUTHORIZED);
+
+    if (user.Admin !== 1) throw new HttpException('No', HttpStatus.FORBIDDEN);
+
     if (!body.password)
       throw new HttpException('No password provided', HttpStatus.BAD_REQUEST);
     else if (!body.username)
@@ -42,19 +51,6 @@ export class AuthController {
       throw new HttpException('Username already used', HttpStatus.CONFLICT);
     }
     await this.authService.register(body);
-  }
-
-  @Post('password/change')
-  public async changePassword(
-    @Body() body: LoginDTO,
-    @Req() req: Request,
-  ): Promise<void> {
-    const user = this.tokenService.extractUserFromRequest(req);
-
-    if (user.Admin !== 1)
-      throw new HttpException('stop, thief', HttpStatus.FORBIDDEN);
-
-    await this.authService.changePassword(body);
   }
 
   @Post('verify')
