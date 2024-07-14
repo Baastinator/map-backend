@@ -92,7 +92,10 @@ export class PinService {
            FROM Pins P
                     JOIN Maps M on M.ID = P.MapID
                     JOIN UserMapLink UML on M.ID = UML.MapID
-                    JOIN Map.Users U on UML.UserID = U.ID`,
+                    JOIN Map.Users U on UML.UserID = U.ID
+           WHERE P.ID = ?
+             AND U.ID = ?`,
+          [pinId, userId],
         )
       )[0].Admin === 1
     );
