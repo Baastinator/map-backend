@@ -12,9 +12,10 @@ import { MysqlModule } from './mysql/mysql.module';
 import { AuthMiddleware } from './auth/auth-middleware/auth.middleware';
 import { UserController } from './user/user.controller';
 import { UserService } from './user/user.service';
+import { LogModule } from './log/log.module';
 
 @Module({
-  imports: [ConfigModule.forRoot(), AuthModule, MysqlModule],
+  imports: [ConfigModule.forRoot(), AuthModule, MysqlModule, LogModule],
   controllers: [MapController, ImageController, PinController, UserController],
   providers: [
     MapService,

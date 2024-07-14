@@ -38,23 +38,28 @@ export class AuthController {
   ): Promise<void> {
     const user = this.tokenService.extractUserFromRequest(req);
 
-    if (!user) throw new HttpException('login first', HttpStatus.UNAUTHORIZED);
+    if (!user) throw new HttpException('UNAUTHORIZED', HttpStatus.UNAUTHORIZED);
 
-    if (user.Admin !== 1) throw new HttpException('No', HttpStatus.FORBIDDEN);
+    if (user.Admin !== 1)
+      throw new HttpException('FORBIDDEN', HttpStatus.FORBIDDEN);
 
     if (!body.password)
       throw new HttpException('No password provided', HttpStatus.BAD_REQUEST);
-    else if (!body.username)
+
+    if (!body.username)
       throw new HttpException('No username provided', HttpStatus.BAD_REQUEST);
 
-    if (await this.authService.exists(body.username)) {
+    if (await this.authService.exists(body.username))
       throw new HttpException('Username already used', HttpStatus.CONFLICT);
-    }
+
     await this.authService.register(body);
   }
 
   @Post('verify')
   public async verify(@Body() { token }: { token: string }): Promise<boolean> {
+    if (!token)
+      throw new HttpException('No token provided', HttpStatus.BAD_REQUEST);
+
     return await this.authService.verify(token);
   }
 }

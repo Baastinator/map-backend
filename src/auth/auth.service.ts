@@ -5,12 +5,14 @@ import { UserModel } from '../user/models/user.model';
 import * as bcrypt from 'bcrypt';
 import { hashSync } from 'bcrypt';
 import { TokenService } from './token.service';
+import { LogService } from '../log/log.service';
 
 @Injectable()
 export class AuthService {
   constructor(
     private mysqlService: MysqlService,
     private tokenService: TokenService,
+    private logService: LogService,
   ) {}
 
   public async login(body: LoginDTO): Promise<string | null> {
@@ -21,10 +23,7 @@ export class AuthService {
     const valid = bcrypt.compareSync(body.password, user.Passhash);
     if (!valid) return null;
 
-    await this.mysqlService.query(
-      'INSERT INTO Logs (UserID, EventID) VALUES (?, ?)',
-      [user.ID, 3],
-    );
+    await this.logService.log(user.ID, 3);
 
     return this.tokenService.generateToken(user);
   }
@@ -34,10 +33,7 @@ export class AuthService {
 
     const hash = hashSync(body.password, saltRounds);
 
-    await this.mysqlService.query(
-      'INSERT INTO Logs (UserID, EventID) VALUES (?, ?)',
-      [7, 10],
-    );
+    await this.logService.log(7, 10);
 
     return await this.mysqlService.query(
       'INSERT INTO Users (Username, Passhash) VALUES (?, ?)',
