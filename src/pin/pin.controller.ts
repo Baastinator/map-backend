@@ -7,6 +7,7 @@ import {
   HttpStatus,
   Param,
   Post,
+  Put,
   Req,
 } from '@nestjs/common';
 import { PinDto } from './models/pin.dto';
@@ -102,9 +103,9 @@ export class PinController {
     return await this.pinService.createNew(body, user.ID);
   }
 
-  @Post('rename/:id')
-  public async renamePin(
-    @Body() { name }: { name: string },
+  @Put(':id')
+  public async updatePinById(
+    @Body() body: Partial<PinCreateDto>,
     @Param() { id }: Identifiable,
     @Req() req: Request,
   ): Promise<void> {
@@ -123,36 +124,12 @@ export class PinController {
         HttpStatus.BAD_REQUEST,
       );
 
-    if (!name) throw new HttpException('Name missing', HttpStatus.BAD_REQUEST);
+    const pin = await this.pinService.getById(id);
 
-    return await this.pinService.rename(name, id, user.ID);
-  }
+    if (body.content) pin.Content = body.content;
+    if (body.name) pin.Name = body.name;
 
-  @Post('content/:id')
-  public async reContentPin(
-    @Body() { content }: { content: string },
-    @Param() { id }: Identifiable,
-    @Req() req: Request,
-  ): Promise<void> {
-    const user = this.tokenService.extractUserFromRequest(req);
-
-    if (!user) throw new HttpException('UNAUTHORIZED', HttpStatus.UNAUTHORIZED);
-
-    const isMapAdmin = await this.pinService.isMapAdmin(id, user.ID);
-
-    if (!isMapAdmin && !user.Admin)
-      throw new HttpException('FORBIDDEN', HttpStatus.FORBIDDEN);
-
-    if (!(+id > 0))
-      throw new HttpException(
-        'ID needs to be a number',
-        HttpStatus.BAD_REQUEST,
-      );
-
-    if (!content)
-      throw new HttpException('Content missing', HttpStatus.BAD_REQUEST);
-
-    return await this.pinService.reContent(content, id, user.ID);
+    await this.pinService.update(pin, user.ID);
   }
 
   @Delete(':id')
@@ -166,8 +143,14 @@ export class PinController {
 
     const isMapAdmin = await this.pinService.isMapAdmin(id, user.ID);
 
+    console.log('user.Admin', user.Admin);
+    console.log('isMapAdmin', isMapAdmin);
+
     if (!isMapAdmin && !user.Admin)
-      throw new HttpException('FORBIDDEN', HttpStatus.FORBIDDEN);
+      throw new HttpException(
+        'Lacking permissions to delete pin.',
+        HttpStatus.FORBIDDEN,
+      );
 
     if (!(+id > 0))
       throw new HttpException(

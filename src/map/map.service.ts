@@ -5,6 +5,7 @@ import { MapCreateDto } from './models/map-create.dto';
 import { SignalService } from '../gateways/socket/signal.service';
 import { Signals } from '../gateways/socket/signals.enum';
 import { LogService } from '../log/log.service';
+import { UserModel } from '../user/models/user.model';
 
 @Injectable()
 export class MapService {
@@ -14,8 +15,20 @@ export class MapService {
     private logService: LogService,
   ) {}
 
-  public async getAll(): Promise<MapModel[]> {
-    return await this.mysqlService.query('SELECT * FROM Maps');
+  public async getAll(user: Omit<UserModel, 'Passhash'>): Promise<MapModel[]> {
+    if (user.Admin == 1)
+      return await this.mysqlService.query(
+        `SELECT M.*
+         FROM Maps M`,
+      );
+
+    return await this.mysqlService.query(
+      `SELECT M.*
+       FROM Maps M
+                JOIN Map.UserMapLink UML on M.ID = UML.MapID
+       WHERE UserID = ?`,
+      [user.ID],
+    );
   }
 
   public async getById(id: number): Promise<MapModel> {

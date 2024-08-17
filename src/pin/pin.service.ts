@@ -58,46 +58,33 @@ export class PinService {
     this.signalService.sendSignal(Signals.Pins);
   }
 
-  public async rename(name: string, id: number, userId: number): Promise<void> {
+  public async update(data: PinDto, userId: number): Promise<void> {
     await this.mysqlService.query<void>(
-      'UPDATE Pins SET Name = ? WHERE ID = ?',
-      [name, id],
+      'UPDATE Pins SET Name = ?, Content = ? WHERE ID = ?',
+      [data.Name, data.Content, data.ID],
     );
 
-    await this.logService.log(userId, 15);
-
-    this.signalService.sendSignal(Signals.Pins);
-  }
-
-  public async reContent(
-    content: string,
-    id: number,
-    userId: number,
-  ): Promise<void> {
-    await this.mysqlService.query<void>(
-      'UPDATE Pins SET Content = ? WHERE ID = ?',
-      [content, id],
-    );
-
-    await this.logService.log(userId, 16);
+    await this.logService.log(userId, 18);
 
     this.signalService.sendSignal(Signals.Pins);
   }
 
   public async isMapAdmin(pinId: number, userId: number): Promise<boolean> {
-    return (
-      (
-        await this.mysqlService.query<{ Admin: 0 | 1 }[]>(
-          `SELECT UML.Admin
-           FROM Pins P
-                    JOIN Maps M on M.ID = P.MapID
-                    JOIN UserMapLink UML on M.ID = UML.MapID
-                    JOIN Map.Users U on UML.UserID = U.ID
-           WHERE P.ID = ?
-             AND U.ID = ?`,
-          [pinId, userId],
-        )
-      )[0].Admin === 1
+    const result = await this.mysqlService.query<{ Admin: 0 | 1 }[]>(
+      `SELECT UML.Admin
+       FROM Pins P
+                JOIN Maps M on M.ID = P.MapID
+                JOIN UserMapLink UML on M.ID = UML.MapID
+                JOIN Map.Users U on UML.UserID = U.ID
+       WHERE P.ID = ?
+         AND U.ID = ?`,
+      [pinId, userId],
     );
+
+    console.log(result);
+
+    if (result.length == 0) return false;
+
+    return result[0].Admin === 1;
   }
 }

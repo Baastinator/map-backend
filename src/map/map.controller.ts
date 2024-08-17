@@ -36,7 +36,8 @@ export class MapController {
 
     if (!user) throw new HttpException('UNAUTHORIZED', HttpStatus.UNAUTHORIZED);
 
-    const maps = await this.mapService.getAll();
+    const maps = await this.mapService.getAll(user);
+
     const ownerMaps: MapOwnerModel[] = [];
 
     for (const map of maps) {
@@ -78,6 +79,9 @@ export class MapController {
     const user = this.tokenService.extractUserFromRequest(req);
 
     if (!user) throw new HttpException('UNAUTHORIZED', HttpStatus.UNAUTHORIZED);
+
+    if (user.AllowMapUpload === 0 && user.Admin === 0)
+      throw new HttpException('FORBIDDEN', HttpStatus.FORBIDDEN);
 
     if (!body.url)
       throw new HttpException('URL missing', HttpStatus.BAD_REQUEST);

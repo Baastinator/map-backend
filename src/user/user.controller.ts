@@ -25,8 +25,9 @@ export class UserController {
 
   @Get('')
   public async getUsers(@Req() req: Request): Promise<
-    (Omit<UserModel, 'Passhash' | 'Admin'> & {
+    (Omit<UserModel, 'Passhash' | 'Admin' | 'AllowMapUpload'> & {
       Admin: boolean;
+      AllowMapUpload: boolean;
     })[]
   > {
     const user = this.tokenService.extractUserFromRequest(req);
@@ -115,14 +116,58 @@ export class UserController {
     if (!user.Admin && !isMapAdmin)
       throw new HttpException('FORBIDDEN', HttpStatus.FORBIDDEN);
 
+    let error = this.validation(mapId, userId);
+
+    if (error) throw error;
+
+    error = await this.userService.setUserLink(mapId, userId, user.ID, false);
+
+    if (error) throw error;
+  }
+
+  @Post('links/addAdmin')
+  public async addMapLinkAdmin(
+    @Body() { mapId, userId }: LinkDto,
+    @Req() req: Request,
+  ): Promise<void> {
+    const user = this.tokenService.extractUserFromRequest(req);
+
+    if (!user) throw new HttpException('UNAUTHORIZED', HttpStatus.UNAUTHORIZED);
+
+    const isMapAdmin = await this.userService.isMapAdmin(mapId, user.ID);
+
+    if (!user.Admin && !isMapAdmin)
+      throw new HttpException('FORBIDDEN', HttpStatus.FORBIDDEN);
+
     const error = this.validation(mapId, userId);
 
     if (error) throw error;
 
-    await this.userService.setUserLink(mapId, userId, user.ID, false);
+    await this.userService.setUserLinkAdmin(mapId, userId, user.ID, true);
   }
 
-  private validation(mapId: number, userId: number): HttpException {
+  @Post('links/removeAdmin')
+  public async removeMapLinkAdmin(
+    @Body() { mapId, userId }: LinkDto,
+    @Req() req: Request,
+  ): Promise<void> {
+    const user = this.tokenService.extractUserFromRequest(req);
+
+    if (!user) throw new HttpException('UNAUTHORIZED', HttpStatus.UNAUTHORIZED);
+
+    const isMapAdmin = await this.userService.isMapAdmin(mapId, user.ID);
+
+    if (!user.Admin && !isMapAdmin)
+      throw new HttpException('Not allowed.', HttpStatus.FORBIDDEN);
+
+    const error = this.validation(mapId, userId);
+
+    if (error) throw error;
+
+    await this.userService.setUserLinkAdmin(mapId, userId, user.ID, false);
+  }
+
+  private validation(mapId: number, userId: number): void | HttpException {
     if (!mapId)
       return new HttpException('mapId missing', HttpStatus.BAD_REQUEST);
 

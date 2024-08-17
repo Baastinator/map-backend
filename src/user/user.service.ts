@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { LoginDTO } from '../auth/models/login.dto';
 import { hashSync } from 'bcrypt';
 import { MysqlService } from '../mysql/mysql.service';
@@ -29,8 +29,9 @@ export class UserService {
   }
 
   public async getAll(): Promise<
-    (Omit<UserModel, 'Passhash' | 'Admin'> & {
+    (Omit<UserModel, 'Passhash' | 'Admin' | 'AllowMapUpload'> & {
       Admin: boolean;
+      AllowMapUpload: boolean;
     })[]
   > {
     return (
@@ -39,6 +40,7 @@ export class UserService {
       ID: user.ID,
       Admin: user.Admin === 1,
       Username: user.Username,
+      AllowMapUpload: user.AllowMapUpload === 1,
     }));
   }
 
@@ -63,7 +65,17 @@ export class UserService {
     userId: number,
     setterId: number,
     add: boolean,
-  ): Promise<void> {
+  ): Promise<void | HttpException> {
+    if (!add) {
+      const isAdmin = await this.isMapAdmin(mapId, userId);
+
+      if (isAdmin)
+        return new HttpException(
+          'Cannot remove an admin from the map.',
+          HttpStatus.CONFLICT,
+        );
+    }
+
     await this.logService.log(setterId, add ? 8 : 6);
 
     await this.mysqlService.query(
@@ -82,6 +94,21 @@ export class UserService {
     setterId: number,
     enable: boolean,
   ): Promise<void> {
+    if (!enable && (await this.isMapOwner(mapId, userId)))
+      throw new HttpException(
+        "Cannot remove Map Owner's Admin",
+        HttpStatus.FORBIDDEN,
+      );
+
+    const link = (
+      await this.mysqlService.query<{ UserID: 0 | 1 }[]>(
+        'SELECT UserID FROM UserMapLink WHERE MapID = ? AND UserID = ?',
+        [mapId, userId],
+      )
+    )[0];
+
+    if (!link) await this.setUserLink(mapId, userId, setterId, true);
+
     await this.logService.log(setterId, enable ? 9 : 17);
 
     await this.mysqlService.query(

@@ -14,6 +14,7 @@ export class TokenService {
       userID: user.ID,
       admin: user.Admin === 1,
       username: user.Username,
+      mapUploader: user.AllowMapUpload === 1,
     };
 
     return jwt.sign(payload, this.configService.get('SECRET'), {
@@ -49,6 +50,7 @@ export class TokenService {
       ID: payload.userID,
       Username: payload.username,
       Admin: payload.admin ? 1 : 0,
+      AllowMapUpload: payload.mapUploader ? 1 : 0,
     };
   }
 }

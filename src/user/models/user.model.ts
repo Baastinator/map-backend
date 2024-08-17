@@ -3,4 +3,5 @@ export interface UserModel {
   Username: string;
   Passhash: string;
   Admin: 0 | 1;
+  AllowMapUpload: 0 | 1;
 }
