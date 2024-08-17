@@ -1,18 +1,24 @@
-import { Test, TestingModule } from '@nestjs/testing';
 import { SignalGateway } from './signal.gateway';
+import { mock } from 'jest-mock-extended';
+import { SignalService } from './signal.service';
+import { of } from 'rxjs';
+import { Signals } from './signals.enum';
 
 describe('SignalGateway', () => {
-  let gateway: SignalGateway;
+  const setup = (): {
+    gateway: SignalGateway;
+  } => {
+    const signalService = mock<SignalService>();
+    signalService.getSignal.mockReturnValue(of(Signals.Maps));
 
-  beforeEach(async () => {
-    const module: TestingModule = await Test.createTestingModule({
-      providers: [SignalGateway],
-    }).compile();
+    const gateway = new SignalGateway(signalService);
 
-    gateway = module.get<SignalGateway>(SignalGateway);
-  });
+    return { gateway };
+  };
 
   it('should be defined', () => {
+    const { gateway } = setup();
+
     expect(gateway).toBeDefined();
   });
 });

@@ -32,33 +32,34 @@ export class AuthController {
   }
 
   @Post('register')
-  public async register(@Body() body: LoginDTO): Promise<void> {
-    if (!body.password)
-      throw new HttpException('No password provided', HttpStatus.BAD_REQUEST);
-    else if (!body.username)
-      throw new HttpException('No username provided', HttpStatus.BAD_REQUEST);
-
-    if (await this.authService.exists(body.username)) {
-      throw new HttpException('Username already used', HttpStatus.CONFLICT);
-    }
-    await this.authService.register(body);
-  }
-
-  @Post('password/change')
-  public async changePassword(
+  public async register(
     @Body() body: LoginDTO,
     @Req() req: Request,
   ): Promise<void> {
     const user = this.tokenService.extractUserFromRequest(req);
 
-    if (user.Admin !== 1)
-      throw new HttpException('stop, thief', HttpStatus.FORBIDDEN);
+    if (!user) throw new HttpException('UNAUTHORIZED', HttpStatus.UNAUTHORIZED);
 
-    await this.authService.changePassword(body);
+    if (user.Admin !== 1)
+      throw new HttpException('FORBIDDEN', HttpStatus.FORBIDDEN);
+
+    if (!body.password)
+      throw new HttpException('No password provided', HttpStatus.BAD_REQUEST);
+
+    if (!body.username)
+      throw new HttpException('No username provided', HttpStatus.BAD_REQUEST);
+
+    if (await this.authService.exists(body.username))
+      throw new HttpException('Username already used', HttpStatus.CONFLICT);
+
+    await this.authService.register(body);
   }
 
   @Post('verify')
   public async verify(@Body() { token }: { token: string }): Promise<boolean> {
+    if (!token)
+      throw new HttpException('No token provided', HttpStatus.BAD_REQUEST);
+
     return await this.authService.verify(token);
   }
 }

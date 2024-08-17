@@ -10,20 +10,26 @@ import { PinController } from './pin/pin.controller';
 import { AuthModule } from './auth/auth.module';
 import { MysqlModule } from './mysql/mysql.module';
 import { AuthMiddleware } from './auth/auth-middleware/auth.middleware';
+import { UserController } from './user/user.controller';
+import { UserService } from './user/user.service';
+import { LogModule } from './log/log.module';
 
 @Module({
-  imports: [ConfigModule.forRoot(), AuthModule, MysqlModule],
-  controllers: [MapController, ImageController, PinController],
+  imports: [ConfigModule.forRoot(), AuthModule, MysqlModule, LogModule],
+  controllers: [MapController, ImageController, PinController, UserController],
   providers: [
     MapService,
     ConfigService,
     SignalService,
     SignalGateway,
     PinService,
+    UserService,
   ],
 })
 export class AppModule implements NestModule {
   configure(consumer: MiddlewareConsumer): any {
-    consumer.apply(AuthMiddleware).forRoutes(MapController);
+    consumer
+      .apply(AuthMiddleware)
+      .forRoutes(MapController, PinController, UserController, ImageController);
   }
 }

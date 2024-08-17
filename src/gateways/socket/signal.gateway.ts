@@ -20,9 +20,7 @@ export class SignalGateway
   constructor(private signalService: SignalService) {
     this.signalService
       .getSignal()
-      .pipe(
-        filter((signal: Signals | null): signal is Signals => signal !== null),
-      )
+      .pipe(filter(Boolean))
       .subscribe((signal: Signals) => {
         this.clients.forEach((socket: Socket) => {
           socket.emit(signal);
